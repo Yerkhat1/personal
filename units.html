@@ -1,0 +1,170 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Units in 5 Minutes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Kalam:wght@400;700&display=swap">
+<link rel="stylesheet" href="style.css"></head><body><div class="desk"><main id="app">
+<div class="paper">
+<header class="ph">
+  <div class="course">PHYS161 · Physics I <nav class="tabs"><a href="./">Trainer</a><a href="units.html" aria-current="page">Units</a></nav></div>
+  <div class="rightc">5-minute read</div>
+  <h1>Units, fast</h1>
+  <div class="instr">Three rules, one table, then drill until it's automatic.</div>
+</header><hr class="dbl">
+
+<section class="sec">
+  <h2><b>1</b> Three rules</h2>
+  <p class="rule"><b>Convert first.</b> Before you plug in, everything goes to <span class="num">m, kg, s</span>. Then the answer comes out in SI by itself.</p>
+  <p class="rule"><b>Unit = what they ask.</b> Asked for force → N. Asked for speed → m/s. Read the last sentence of the problem.</p>
+  <p class="rule"><b>Ratio = no unit.</b> "By what factor", "how many times", "ratio" → leave the unit box empty.</p>
+</section>
+
+<section class="sec">
+  <h2><b>2</b> Convert to SI before plugging in</h2>
+  <div class="tw"><table class="ut">
+    <tr><th>Given in</th><th>Do</th><th>Example</th></tr>
+    <tr><td>km</td><td class="num">× 1000</td><td class="num">6371 km = 6.371×10⁶ m</td></tr>
+    <tr><td>cm</td><td class="num">÷ 100</td><td class="num">12 cm = 0.12 m</td></tr>
+    <tr><td>mm</td><td class="num">÷ 1000</td><td class="num">5 mm = 0.005 m</td></tr>
+    <tr><td>g</td><td class="num">÷ 1000</td><td class="num">250 g = 0.25 kg</td></tr>
+    <tr><td>min / h / day</td><td class="num">× 60 / × 3600 / × 86400</td><td class="num">2 h = 7200 s</td></tr>
+    <tr><td>rpm (rev/min)</td><td class="num">× 2π / 60</td><td class="num">60 rpm = 6.28 rad/s</td></tr>
+    <tr><td>degrees</td><td class="num">× π / 180</td><td class="num">10° = 0.1745 rad</td></tr>
+  </table></div>
+  <p class="small" style="margin:10px 0 0">Exception: if the question asks the answer in km (like P1), give km.</p>
+</section>
+
+<section class="sec">
+  <h2><b>3</b> What unit the answer has</h2>
+  <div class="tw"><table class="ut">
+    <tr><th>They ask for</th><th>Unit</th><th>Type it as</th></tr>
+    <tr><td>Force, weight, tension</td><td>N</td><td class="num">N</td></tr>
+    <tr><td>Acceleration, g</td><td>m/s²</td><td class="num">m/s2</td></tr>
+    <tr><td>Speed, v, v<sub>max</sub>, escape speed</td><td>m/s</td><td class="num">m/s</td></tr>
+    <tr><td>Distance, height, radius, amplitude, length, λ</td><td>m</td><td class="num">m</td></tr>
+    <tr><td>Mass</td><td>kg</td><td class="num">kg</td></tr>
+    <tr><td>Energy, work, KE, PE</td><td>J</td><td class="num">J</td></tr>
+    <tr><td>Period T, time</td><td>s</td><td class="num">s</td></tr>
+    <tr><td>Frequency f, beat frequency</td><td>Hz</td><td class="num">Hz</td></tr>
+    <tr><td>Angular frequency ω</td><td>rad/s</td><td class="num">rad/s</td></tr>
+    <tr><td>Spring constant k</td><td>N/m</td><td class="num">N/m</td></tr>
+    <tr><td>Density ρ</td><td>kg/m³</td><td class="num">kg/m3</td></tr>
+    <tr><td>Damping b/2m</td><td>s⁻¹</td><td class="num">1/s</td></tr>
+    <tr><td>Ratio, factor, "how many times"</td><td>none</td><td class="num"><i>leave empty</i></td></tr>
+    <tr><td>Percent</td><td>%</td><td class="num">%</td></tr>
+  </table></div>
+</section>
+
+<section class="sec">
+  <h2><b>4</b> Traps</h2>
+  <div class="tw"><table class="ut">
+    <tr><td>f vs ω</td><td>f is Hz, ω is rad/s. <span class="num">ω = 2πf</span></td></tr>
+    <tr><td>T vs f</td><td>T is s, f is Hz. <span class="num">f = 1/T</span></td></tr>
+    <tr><td>k vs F</td><td>k is N/m (force per metre), F is N</td></tr>
+    <tr><td>Radius</td><td>From the centre: <span class="num">r = R + h</span>, in metres</td></tr>
+    <tr><td>Answer 1000× off</td><td>You forgot km → m or g → kg</td></tr>
+  </table></div>
+</section>
+
+<section class="sec">
+  <h2><b>5</b> Drill</h2>
+  <div class="drill">
+    <div class="radios" id="kind">
+      <button class="radio" data-k="mix" aria-pressed="true"><i></i>Mixed</button>
+      <button class="radio" data-k="unit" aria-pressed="false"><i></i>Which unit?</button>
+      <button class="radio" data-k="conv" aria-pressed="false"><i></i>Convert</button>
+    </div>
+    <div class="qq" id="qq"></div>
+    <div class="ansrow">
+      <label class="abox"><span class="lab">Answer</span><input id="da" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Drill answer"></label>
+      <div class="tools"><button class="link" id="dchk">Check</button><button class="link" id="dskip">Next</button></div>
+    </div>
+    <div id="dfb" aria-live="polite"></div>
+    <div class="score" id="dsc"></div>
+  </div>
+</section>
+</div>
+</main></div>
+<script>
+(() => {
+  const normU = s => String(s || '').toLowerCase().replace(/[\s*·⋅^()]/g, '').replace(/²/g, '2').replace(/³/g, '3').replace(/⁻¹/g, '-1').replace(/[−–]/g, '-');
+  const NONE = ['', '-', 'none', '1', 'nounit', 'unitless'];
+  const U = [
+    ['the gravitational force between two planets', 'N', ['n', 'newton', 'kgm/s2']],
+    ['the acceleration due to gravity at height h', 'm/s²', ['m/s2', 'ms-2']],
+    ['the escape speed from a planet', 'm/s', ['m/s', 'ms-1']],
+    ['the orbital speed of a satellite', 'm/s', ['m/s', 'ms-1']],
+    ['the height of a satellite above the surface', 'm', ['m']],
+    ['the period of a pendulum', 's', ['s', 'sec']],
+    ['the period of a satellite orbit', 's', ['s', 'sec']],
+    ['the frequency heard by a listener (Doppler)', 'Hz', ['hz', '1/s', 's-1']],
+    ['the beat frequency', 'Hz', ['hz', '1/s', 's-1']],
+    ['the angular frequency ω of an oscillator', 'rad/s', ['rad/s', '1/s', 's-1']],
+    ['the spring constant k', 'N/m', ['n/m', 'nm-1', 'kg/s2']],
+    ['the total mechanical energy of an oscillator', 'J', ['j', 'joule', 'nm']],
+    ['the kinetic energy needed to escape', 'J', ['j', 'joule', 'nm']],
+    ['the amplitude of oscillation', 'm', ['m']],
+    ['the maximum speed of a mass on a spring', 'm/s', ['m/s', 'ms-1']],
+    ['the maximum acceleration in SHM', 'm/s²', ['m/s2', 'ms-2']],
+    ['the mass of a planet', 'kg', ['kg']],
+    ['the density of a planet', 'kg/m³', ['kg/m3', 'kgm-3']],
+    ['the speed of sound in a gas', 'm/s', ['m/s', 'ms-1']],
+    ['the length of a closed pipe', 'm', ['m']],
+    ['by what factor g on planet Y is larger than on X', 'none', NONE],
+    ['the ratio of two periods', 'none', NONE],
+    ['the damping constant b/2m', 's⁻¹', ['s-1', '1/s', '/s']],
+    ['the wavelength of a sound wave', 'm', ['m']],
+    ['the tension (force) in a string', 'N', ['n', 'newton']],
+  ];
+  const C = [
+    ['km', 'm', () => Math.round(100 + Math.random() * 9000), x => x * 1000],
+    ['cm', 'm', () => Math.round(1 + Math.random() * 300), x => x / 100],
+    ['mm', 'm', () => Math.round(1 + Math.random() * 900), x => x / 1000],
+    ['g', 'kg', () => Math.round(20 + Math.random() * 3000), x => x / 1000],
+    ['min', 's', () => Math.round(1 + Math.random() * 90), x => x * 60],
+    ['h', 's', () => Math.round(1 + Math.random() * 24), x => x * 3600],
+    ['days', 's', () => Math.round(1 + Math.random() * 30), x => x * 86400],
+    ['rpm', 'rad/s', () => Math.round(10 + Math.random() * 3000), x => x * 2 * Math.PI / 60],
+    ['°', 'rad', () => Math.round(1 + Math.random() * 90), x => x * Math.PI / 180],
+  ];
+  function parseAns(str) {
+    let s = String(str).trim().replace(/\s+/g, '').replace(/−/g, '-');
+    if (!s) return null;
+    if (!s.includes('.') && /^-?\d+,\d+$/.test(s)) s = s.replace(',', '.');
+    s = s.replace(/,/g, '');
+    const m = s.match(/^([+-]?(?:\d+\.?\d*|\.\d+))(?:(?:[x×*·]10\^?\(?([+-]?\d+)\)?)|(?:e([+-]?\d+)))?$/i);
+    if (!m) return NaN;
+    const exp = m[2] ?? m[3];
+    return parseFloat(m[1]) * (exp !== undefined ? 10 ** parseInt(exp, 10) : 1);
+  }
+  const fmt = x => { const a = Math.abs(x); return a >= 1e6 || (a < 1e-3 && a) ? x.toExponential(3).replace(/e\+?(-?\d+)/, ' × 10^$1') : String(Number(x.toPrecision(5))); };
+  let kind = 'mix', q = null, right = 0, tries = 0, streak = 0, answered = false;
+  const $ = id => document.getElementById(id);
+  function next() {
+    const t = kind === 'mix' ? (Math.random() < 0.55 ? 'unit' : 'conv') : kind;
+    if (t === 'unit') { const [what, unit, ok] = U[Math.floor(Math.random() * U.length)]; q = { t, unit, ok }; $('qq').innerHTML = `Unit of <b>${what}</b>?${unit === 'none' ? '' : ''}`; $('da').placeholder = 'unit (empty = none)'; }
+    else { const [a, b, gen, f] = C[Math.floor(Math.random() * C.length)]; const x = gen(); q = { t, ans: f(x), b }; $('qq').innerHTML = `<span class="num">${x} ${a}</span> = ? <span class="num">${b}</span>`; $('da').placeholder = 'number'; }
+    $('da').value = ''; $('dfb').innerHTML = ''; answered = false; $('da').focus();
+  }
+  function check() {
+    if (answered) { next(); return; }
+    const v = $('da').value; let ok;
+    if (q.t === 'unit') ok = q.ok.includes(normU(v));
+    else { const u = parseAns(v); if (u === null || Number.isNaN(u)) { $('dfb').innerHTML = '<div class="warn">Type a number, like 6.4e6.</div>'; return; } ok = Math.abs(u - q.ans) / q.ans <= 0.005; }
+    tries++; if (ok) { right++; streak++; } else streak = 0;
+    answered = true;
+    const sol = q.t === 'unit' ? (q.unit === 'none' ? 'no unit (leave empty)' : q.unit) : `${fmt(q.ans)} ${q.b}`;
+    $('dfb').innerHTML = `<div class="pen">${ok ? '✓' : '✗'} ${sol}${ok ? '' : ''} <span class="small" style="font-family:var(--f-text)">· Enter for next</span></div>`;
+    $('dsc').textContent = `${right} / ${tries} correct · streak ${streak}`;
+  }
+  $('da').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); check(); } };
+  $('dchk').onclick = check; $('dskip').onclick = next;
+  document.querySelectorAll('#kind .radio').forEach(b => b.onclick = () => { kind = b.dataset.k; document.querySelectorAll('#kind .radio').forEach(x => x.setAttribute('aria-pressed', x === b)); next(); });
+  $('dsc').textContent = 'Enter to check, Enter again for the next one.';
+  next(); $('da').blur();
+})();
+</script>
+</body></html>
