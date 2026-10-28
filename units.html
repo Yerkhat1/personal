@@ -147,7 +147,7 @@
     const t = kind === 'mix' ? (Math.random() < 0.55 ? 'unit' : 'conv') : kind;
     if (t === 'unit') { const [what, unit, ok] = U[Math.floor(Math.random() * U.length)]; q = { t, unit, ok }; $('qq').innerHTML = `Unit of <b>${what}</b>?${unit === 'none' ? '' : ''}`; $('da').placeholder = 'unit (empty = none)'; }
     else { const [a, b, gen, f] = C[Math.floor(Math.random() * C.length)]; const x = gen(); q = { t, ans: f(x), b }; $('qq').innerHTML = `<span class="num">${x} ${a}</span> = ? <span class="num">${b}</span>`; $('da').placeholder = 'number'; }
-    $('da').value = ''; $('dfb').innerHTML = ''; answered = false; $('da').focus();
+    $('da').value = ''; $('dfb').innerHTML = ''; answered = false; $('da').focus({ preventScroll: true });
   }
   function check() {
     if (answered) { next(); return; }
@@ -164,7 +164,7 @@
   $('dchk').onclick = check; $('dskip').onclick = next;
   document.querySelectorAll('#kind .radio').forEach(b => b.onclick = () => { kind = b.dataset.k; document.querySelectorAll('#kind .radio').forEach(x => x.setAttribute('aria-pressed', x === b)); next(); });
   $('dsc').textContent = 'Enter to check, Enter again for the next one.';
-  next(); $('da').blur();
+  next(); $('da').blur(); window.scrollTo(0, 0);
 })();
 </script>
 </body></html>
