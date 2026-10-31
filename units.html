@@ -55,6 +55,10 @@
     <tr><td>Damping b/2m</td><td>s⁻¹</td><td class="num">1/s</td></tr>
     <tr><td>Ratio, factor, "how many times"</td><td>none</td><td class="num"><i>leave empty</i></td></tr>
     <tr><td>Percent</td><td>%</td><td class="num">%</td></tr>
+    <tr><td>Sound intensity level β</td><td>dB</td><td class="num">dB</td></tr>
+    <tr><td>Intensity I</td><td>W/m²</td><td class="num">W/m2</td></tr>
+    <tr><td>Pressure amplitude, bulk / Young's modulus</td><td>Pa</td><td class="num">Pa</td></tr>
+    <tr><td>Power</td><td>W</td><td class="num">W</td></tr>
   </table></div>
 </section>
 
@@ -118,6 +122,11 @@
     ['the damping constant b/2m', 's⁻¹', ['s-1', '1/s', '/s']],
     ['the wavelength of a sound wave', 'm', ['m']],
     ['the tension (force) in a string', 'N', ['n', 'newton']],
+    ['the sound intensity level', 'dB', ['db', 'decibel', 'decibels']],
+    ['the intensity of a sound wave', 'W/m²', ['w/m2', 'wm-2']],
+    ['the bulk modulus of a liquid', 'Pa', ['pa', 'pascal', 'n/m2', 'nm-2']],
+    ['the pressure amplitude of a sound wave', 'Pa', ['pa', 'pascal', 'n/m2', 'nm-2']],
+    ['the average power carried by a wave on a string', 'W', ['w', 'watt', 'j/s']],
   ];
   const C = [
     ['km', 'm', () => Math.round(100 + Math.random() * 9000), x => x * 1000],

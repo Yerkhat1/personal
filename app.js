@@ -8,7 +8,7 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { } },
   };
-  const DEF = { mode: 'mock', covered: 90, count: 7, from: 1, to: 20, topics: ['grav'], numbers: 'new', style: 'exam', timer: 15, tol: 1 };
+  const DEF = { mode: 'mock', covered: 150, count: 7, from: 1, to: 20, topics: ['grav'], numbers: 'new', style: 'exam', timer: 15, tol: 1 };
   let S = Object.assign({}, DEF, store.get('set3.settings', {}));
   let stats = store.get('set3.stats', {});
   const saveS = () => store.set('set3.settings', S);
@@ -23,7 +23,7 @@
     if (Math.abs(m) >= 10) { m = Number((m / 10).toPrecision(sf)); e += 1; }
     return `${m} × 10<sup>${String(e).replace('-', '−')}</sup>`;
   }
-  const fmtParam = (v, sp) => sp && sp.sci ? sci(v, sp.sf) : String(Number(v.toPrecision(Math.max(sp ? sp.sf : 3, 2))));
+  const fmtParam = (v, sp) => !sp ? String(v) : sp.sci ? sci(v, sp.sf) : String(Number(v.toPrecision(Math.max(sp.sf, 2))));
   function fmtAns(x) {
     const a = Math.abs(x);
     if (a !== 0 && (a >= 1e6 || a < 1e-3)) return sci(x, 4);
@@ -53,6 +53,7 @@
     'm/s': ['m/s', 'ms-1'], '': NONE, 'N': ['n', 'newton', 'newtons', 'kgm/s2'], 'kg': ['kg'], 'J': ['j', 'joule', 'joules', 'nm', 'kgm2/s2'],
     'kg/m³': ['kg/m3', 'kgm-3'], 's': ['s', 'sec', 'secs', 'second', 'seconds'], 'Hz': ['hz', '1/s', 's-1', '/s'], 'N/m': ['n/m', 'nm-1', 'kg/s2'],
     's/s': ['s/s', ...NONE], 's⁻¹': ['s-1', '1/s', '/s', 'hz'], '%': ['%', 'percent'],
+    'dB': ['db', 'decibel', 'decibels'], 'W/m²': ['w/m2', 'wm-2'], 'Pa': ['pa', 'pascal', 'n/m2', 'nm-2'], 'W': ['w', 'watt', 'watts', 'j/s'],
   };
   const unitOk = (typed, unit) => (UNITS[unit] || [normU(unit)]).includes(normU(typed));
   const showU = u => u || 'no unit';
@@ -69,7 +70,7 @@
     if (S.mode === 'range') return BANK.filter(p => p.id >= Math.min(S.from, S.to) && p.id <= Math.max(S.from, S.to));
     return mistakes();
   }
-  const pick = (pl, n) => S.mode === 'mistakes' ? shuffle(pl.slice(0, n * 2)).slice(0, n) : shuffle(pl).slice(0, n).sort((a, b) => a.id - b.id);
+  const pick = (pl, n) => S.mode === 'mistakes' ? shuffle(pl.slice(0, n * 2)).slice(0, n) : shuffle(pl).slice(0, n);
 
   function header(sub) {
     const vals = Object.values(stats);
@@ -90,7 +91,7 @@
     const opt = (k, t, d, extra = '') => `<button class="opt" data-mode="${k}" aria-pressed="${S.mode === k}"><span class="tick"></span><span><span class="t">${t}</span> <span class="d">${d}</span></span><span class="lead"></span>${extra}</button>`;
     const radio = (attr, val, label) => `<button class="radio" data-${attr}="${val}" aria-pressed="${S[attr] === val}"><i></i>${label}</button>`;
     $app.innerHTML = `<div class="paper">
-      ${header('Exam 3 problem pool, P1–P100. Same problems as the PDF; only the numbers change.')}
+      ${header(`Exam 3 problem pool, P1–P${MAXID}. Same problems as the PDF; only the numbers change.`)}
       <section class="sec">
         <h2><b>1</b> Choose the paper</h2>
         <div>
