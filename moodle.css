@@ -125,6 +125,8 @@ sup { line-height: 0; }
 .inline-fb { margin-top: 10px; font-size: 14px; }
 .inline-fb.ok { color: var(--ok); }
 .inline-fb.no { color: var(--no); }
+.inline-fb.part { color: #a86500; }
+.qfig { display: block; max-width: 100%; height: auto; max-height: 260px; background: #fff; }
 
 /* navigation block */
 .navblock { position: sticky; top: 80px; }
@@ -136,6 +138,7 @@ sup { line-height: 0; }
 .qnav a.answered::after { background: #8f959e; }
 .qnav a.ok::after { background: var(--ok); }
 .qnav a.no::after { background: var(--no); }
+.qnav a.part::after { background: #f0ad4e; }
 .qnav a.cur { border-width: 2px; border-color: var(--ink); }
 .qnav a.flag::before { content: ""; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent var(--no) transparent transparent; }
 .qnav a:hover { text-decoration: none; border-color: var(--btn); }

@@ -66,6 +66,9 @@
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const FLAG = '<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12M1 1.5h8.5L7.8 4.5l1.7 3H1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
   const ICO_OK = '<svg class="ico" viewBox="0 0 24 24" aria-label="Верно"><circle cx="12" cy="12" r="10" fill="none" stroke="#357a32" stroke-width="2"/><path d="M7.5 12.3l3 3 6-6.6" fill="none" stroke="#357a32" stroke-width="2.2"/></svg>';
+  const ICO_PART = '<svg class="ico" viewBox="0 0 24 24" aria-label="Частично правильный"><circle cx="12" cy="12" r="10" fill="none" stroke="#f0ad4e" stroke-width="2"/><path d="M7.5 12.3l3 3 6-6.6" fill="none" stroke="#f0ad4e" stroke-width="2.2"/></svg>';
+  const UNIT_PENALTY = 0.1;
+  const figHtml = pr => FIGS[pr.id] ? `<p><img class="qfig" src="img/${FIGS[pr.id]}.jpeg" alt="${esc(pr.fig || 'Figure')}"></p>` : pr.fig ? `<div class="fig">Figure: ${pr.fig}</div>` : '';
   const ICO_NO = '<svg class="ico" viewBox="0 0 24 24" aria-label="Неверно"><circle cx="12" cy="12" r="10" fill="none" stroke="#ca3120" stroke-width="2"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" fill="none" stroke="#ca3120" stroke-width="2.2"/></svg>';
 
   // ── pools ──
@@ -142,7 +145,7 @@
           <div class="cyc-top"><div class="prog"><i style="width:${100 * done / total}%"></i></div><span class="small">${done} of ${total} papers done</span></div>
           <div class="sets">${cycle.sets.map((ids, k) => { const r = cycle.res[k];
             const cls = r ? (r.right / r.n >= 0.6 ? 'done' : 'low') : k === nx ? 'next' : '';
-            return `<button class="set ${cls}" data-set="${k}" title="Paper ${k + 1}: ${ids.map(id => 'P' + byId[id].no).join(', ')}"><span class="s1">${k + 1}</span><span class="s2">${r ? `${r.right}/${r.n}` : k === nx ? 'next' : `${ids.length} q`}</span></button>`; }).join('')}</div>
+            return `<button class="set ${cls}" data-set="${k}" title="Paper ${k + 1}: ${ids.map(id => 'P' + byId[id].no).join(', ')}"><span class="s1">${k + 1}</span><span class="s2">${r ? `${+r.right.toFixed(1)}/${r.n}` : k === nx ? 'next' : `${ids.length} q`}</span></button>`; }).join('')}</div>
           <p class="small" style="margin:12px 0 0">Each paper mixes topics, like the real exam. Click any paper to sit it again. ${cycle.sets.some(s => s.length < SET_SIZE) ? `Papers with ${Math.min(...cycle.sets.map(s => s.length))} new problems get one already-seen problem added, so every paper has ${SET_SIZE}.` : ''}</p>
           <p style="margin:10px 0 0"><button class="mlink" id="reshuffle">Start a new shuffle</button></p>
           <div class="confirm" id="reshBox" hidden><p style="margin:0 0 12px">Deal all ${LIVE.length} problems into new papers? Your paper scores for this round are cleared (your overall record stays).</p>
@@ -265,7 +268,7 @@
   function wireNav() {
     $app.querySelectorAll('.qnav a').forEach(a => a.onclick = e => { e.preventDefault(); document.getElementById(a.getAttribute('href').slice(1)).scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
-  const status = x => x.checked === true ? 'Верно' : x.checked === false ? 'Неверно' : x.user.trim() ? 'Ответ сохранен' : 'Пока нет ответа';
+  const status = x => x.checked === true ? 'Верно' : x.checked === 'part' ? 'Частично правильный' : x.checked === false ? 'Неверно' : x.user.trim() ? 'Ответ сохранен' : 'Пока нет ответа';
   function qBlock(x, i, practice) {
     const pr = x.prob;
     return `<div class="que" id="q${i}">
@@ -278,7 +281,7 @@
       </div>
       <div class="qcontent"><div class="formulation">
         <p>${x.html}</p>
-        ${pr.fig ? `<div class="fig">Figure: ${pr.fig}</div>` : ''}
+        ${figHtml(pr)}
         <div class="ans"><label for="in${i}">Ответ:</label><input id="in${i}" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(x.user)}"></div>
         ${practice ? `<div class="chk-row"><button class="mbtn sec" id="chk${i}">Проверить</button><button class="mlink" id="hb${i}">Formula</button></div>` : ''}
         <div id="fb${i}" aria-live="polite"></div>
@@ -304,13 +307,14 @@
     if (Number.isNaN(u)) { fb.innerHTML = '<div class="inline-fb no">Start with a number, then the unit: 2.5e-11 N</div>'; return; }
     const e = relErr(u, x.ans), uok = unitOk(unit, x.prob.unit);
     if (x.checked === null && !(e <= exam.tol && uok)) x.firstWrong = true;
-    x.checked = e <= exam.tol && uok;
-    if (x.checked) fb.innerHTML = `<div class="inline-fb ok">Верно: ${fmtAns(x.ans)} ${x.prob.unit}</div>`;
+    x.checked = e <= exam.tol ? (uok ? true : 'part') : false;
+    if (x.checked === true) fb.innerHTML = `<div class="inline-fb ok">Верно: ${fmtAns(x.ans)} ${x.prob.unit}</div>`;
+    else if (x.checked === 'part') fb.innerHTML = `<div class="inline-fb part">Частично правильный: 0,90 из 1,00 (unit: ${x.prob.unit || 'none'})</div>`;
     else {
       const dir = Math.abs(u) > x.ans ? 'too high' : 'too low';
       const off = e < 1 ? `${(e * 100).toFixed(e < 0.1 ? 1 : 0)}%` : `${Math.round(Math.abs(u) / x.ans)}×`;
       const pow = [1e3, 1e-3, 1e2, 1e-2, 1e4, 1e-4, 1e6, 1e-6].some(f => relErr(u * f, x.ans) <= exam.tol) ? ' Right digits, wrong power of 10: km/m, cm/m, g/kg?' : '';
-      const msg = e <= exam.tol ? `Number right, unit wrong${unit ? '' : ' (no unit typed)'}.` : `${dir} by ${off}.${pow}`;
+      const msg = `${dir} by ${off}.${pow}`;
       fb.innerHTML = `<div class="inline-fb no">Неверно. ${msg} <button class="mlink" id="rv${i}" style="margin-left:6px">Show answer</button></div>`;
       document.getElementById('rv' + i).onclick = () => { x.reveal = true; fb.innerHTML = `<div class="outcome"><p class="rightans">Один из возможных правильных ответов: ${fmtAns(x.ans, 9)} ${x.prob.unit}</p></div>`; };
     }
@@ -320,7 +324,7 @@
   function updNav() {
     exam.qs.forEach((x, i) => {
       const a = document.getElementById('nav' + i); if (!a) return;
-      a.className = (x.checked === true ? 'ok ' : x.checked === false ? 'no ' : x.user.trim() ? 'answered ' : '') + (x.flag ? 'flag' : '');
+      a.className = (x.checked === true ? 'ok ' : x.checked === 'part' ? 'part ' : x.checked === false ? 'no ' : x.user.trim() ? 'answered ' : '') + (x.flag ? 'flag' : '');
       const st = document.getElementById('st' + i); if (st) st.textContent = status(x);
     });
   }
@@ -369,8 +373,9 @@
       x.numOk = !x.blank && relErr(u, x.ans) <= exam.tol;
       x.unitOk = unitOk(unit, x.prob.unit);
       x.ok = x.numOk && x.unitOk;
+      x.score = x.ok ? 1 : x.numOk ? 1 - UNIT_PENALTY : 0;
       const credit = x.ok && !(exam.style === 'practice' && (x.reveal || x.firstWrong));
-      if (x.ok) right++;
+      right += x.score;
       const s = stats[x.prob.id] || { a: 0, c: 0 };
       s.a++; if (credit) s.c++; s.last = credit; stats[x.prob.id] = s;
     });
@@ -399,7 +404,7 @@
         ${exam.qs.map((x, i) => reviewQ(x, i)).join('')}
         <div class="row" style="justify-content:flex-end"><button class="mbtn" id="endReview2">Закончить обзор</button></div>
       </div>${navBlock(true)}</div>`);
-    exam.qs.forEach((x, i) => { const a = document.getElementById('nav' + i); a.className = (x.ok ? 'ok' : 'no') + (x.flag ? ' flag' : ''); });
+    exam.qs.forEach((x, i) => { const a = document.getElementById('nav' + i); a.className = (x.ok ? 'ok' : x.score ? 'part' : 'no') + (x.flag ? ' flag' : ''); });
     wireNav();
     const probs = exam.qs.map(x => x.prob), setIdx = exam.setIdx;
     document.getElementById('again').onclick = () => start(probs, setIdx);
@@ -413,24 +418,24 @@
   function reviewQ(x, i) {
     const pr = x.prob;
     const why = x.ok ? '' : x.blank ? (x.user.trim() ? 'The answer has to start with a number.' : 'No answer given.')
-      : x.numOk ? `The number is right, the unit is not${x.unitTyped ? ` (you wrote "${esc(x.unitTyped)}")` : ' (no unit typed)'}.`
+      : x.numOk ? `−0,10 for the unit: ${x.unitTyped ? `you wrote "${esc(x.unitTyped)}"` : 'no unit typed'}, expected ${pr.unit || 'no unit'}.`
       : `Off by ${(relErr(x.u, x.ans) * 100).toFixed(2)}%.`;
     return `<div class="que" id="q${i}">
       <div class="qinfo">
         <div class="qno">Вопрос <b>${i + 1}</b></div>
-        <div class="st">${x.ok ? 'Верно' : x.blank && !x.user.trim() ? 'Нет ответа' : 'Неверно'}</div>
-        <div class="grade">Баллов: ${x.ok ? '1,00' : '0,00'} из 1,00</div>
+        <div class="st">${x.ok ? 'Верно' : x.score ? 'Частично правильный' : x.blank && !x.user.trim() ? 'Нет ответа' : 'Неверно'}</div>
+        <div class="grade">Баллов: ${fmtNum2(x.score)} из 1,00</div>
         ${x.flag ? `<div class="flagq" aria-pressed="true">${FLAG}<span>Отмечен</span></div>` : ''}
         <div class="src">P${pr.no} · ${topicName[pr.t]}</div>
       </div>
       <div class="qcontent">
         <div class="formulation">
           <p>${x.html}</p>
-          ${pr.fig ? `<div class="fig">Figure: ${pr.fig}</div>` : ''}
-          <div class="ans"><label>Ответ:</label><input readonly value="${esc(x.user)}" aria-label="Ваш ответ">${x.ok ? ICO_OK : ICO_NO}</div>
+          ${figHtml(pr)}
+          <div class="ans"><label>Ответ:</label><input readonly value="${esc(x.user)}" aria-label="Ваш ответ">${x.ok ? ICO_OK : x.score ? ICO_PART : ICO_NO}</div>
           <div class="outcome"><p class="rightans">Один из возможных правильных ответов: ${fmtAns(x.ans, 9)} ${pr.unit}</p>${why ? `<p style="margin-top:6px">${why}</p>` : ''}<div class="formula">${pr.hint}</div></div>
         </div>
-        <div class="outcome"><p>${x.ok ? 'Your answer is correct.' : 'Your answer is incorrect.'}</p></div>
+        <div class="outcome"><p>${x.ok ? 'Your answer is correct.' : x.score ? 'Your answer is partially correct.' : 'Your answer is incorrect.'}</p></div>
       </div>
     </div>`;
   }
