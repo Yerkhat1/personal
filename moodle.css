@@ -34,7 +34,7 @@ button { font: inherit; }
 sup { line-height: 0; }
 
 /* top bar */
-.mbar { background: var(--bar); color: #fff; height: 60px; display: flex; align-items: center; gap: 28px; padding: 0 24px; position: sticky; top: 0; z-index: 5; }
+.mbar { background: var(--bar); color: #fff; height: 60px; display: flex; align-items: center; gap: 28px; padding: 0 max(24px, calc((100% - 1240px) / 2 + 24px)); position: sticky; top: 0; z-index: 5; }
 .mbar .brand { font-size: 22px; font-weight: 500; letter-spacing: .2px; white-space: nowrap; }
 .mbar .brand small { font-size: 13px; opacity: .7; margin-left: 10px; font-weight: 400; }
 .mbar nav { display: flex; gap: 4px; }
