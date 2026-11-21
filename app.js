@@ -1,5 +1,19 @@
 (() => {
   const $app = document.getElementById('app');
+  // ── which exam: ?set=3 / ?set=4, remembered per browser ──
+  const SETS = { 3: window.SET3, 4: window.SET4 };
+  const setNo = (() => {
+    const q = +new URLSearchParams(location.search).get('set');
+    if (SETS[q]) { try { localStorage.setItem('activeSet', q); } catch { } return q; }
+    let s; try { s = +localStorage.getItem('activeSet'); } catch { }
+    return SETS[s] ? s : 4;
+  })();
+  const CUR = SETS[setNo];
+  const { BANK, TOPICS, FIGS, OFFICIAL, REMOVED } = CUR;
+  const EXAM = CUR.name;
+  // formulas in hints are LaTeX; render them whenever the page is redrawn
+  new MutationObserver(() => { if (window.renderMathInElement) renderMathInElement($app, { delimiters: [{ left: '$$', right: '$$', display: true }], throwOnError: false }); })
+    .observe($app, { childList: true });
   const topicName = Object.fromEntries(TOPICS.map(t => [t.k, t.name]));
   // Official numbering from the professor's list; removed problems never appear.
   const LIVE = BANK.filter(p => !REMOVED.has(p.id)).map(p => Object.assign(p, { no: OFFICIAL[p.id] })).sort((a, b) => a.no - b.no);
@@ -11,13 +25,15 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { } },
   };
-  const DEF = { mode: 'cycle', covered: 150, count: 7, from: 1, to: 20, topics: ['grav'], numbers: 'new', style: 'exam', timer: 20, tol: 1 };
-  let S = Object.assign({}, DEF, store.get('set3.settings', {}));
-  let stats = store.get('set3.stats', {});
-  let cycle = store.get('set3.cycle', null);
-  const saveS = () => store.set('set3.settings', S);
-  const saveStats = () => store.set('set3.stats', stats);
-  const saveCycle = () => store.set('set3.cycle', cycle);
+  const DEF = { mode: 'cycle', covered: CUR.covered, cycleTo: CUR.covered, count: 7, from: 1, to: 20, topics: [TOPICS[0].k], numbers: CUR.fixedNumbers ? 'original' : 'new', style: 'exam', timer: 20, tol: 1 };
+  const KEY = `set${setNo}.`;
+  let S = Object.assign({}, DEF, store.get(KEY + 'settings', {}));
+  if (CUR.fixedNumbers) S.numbers = 'original';
+  let stats = store.get(KEY + 'stats', {});
+  let cycle = store.get(KEY + 'cycle', null);
+  const saveS = () => store.set(KEY + 'settings', S);
+  const saveStats = () => store.set(KEY + 'stats', stats);
+  const saveCycle = () => store.set(KEY + 'cycle', cycle);
   let exam = null, tick = null;
 
   // ── number formatting ──
@@ -60,15 +76,19 @@
     'kg/m³': ['kg/m3', 'kgm-3'], 's': ['s', 'sec', 'secs', 'second', 'seconds'], 'Hz': ['hz', '1/s', 's-1', '/s'], 'N/m': ['n/m', 'nm-1', 'kg/s2'],
     's/s': ['s/s', ...NONE], 's⁻¹': ['s-1', '1/s', '/s', 'hz'], '%': ['%', 'percent'],
     'dB': ['db', 'decibel', 'decibels'], 'W/m²': ['w/m2', 'wm-2'], 'Pa': ['pa', 'pascal', 'n/m2', 'nm-2'], 'W': ['w', 'watt', 'watts', 'j/s'],
+    'kcal': ['kcal'], 'K': ['k', 'kelvin', 'kelvins'], '°C': ['°c', 'c', 'degc', 'celsius'], 'm²': ['m2'], 'm³': ['m3'], 'cm³': ['cm3', 'cc', 'ml'],
+    'J/(kg K)': ['j/kgk', 'j/kg/k', 'j/kg°c', 'j/kgc', 'j/k/kg'], 'W/(m K)': ['w/mk', 'w/m/k', 'w/m°c', 'w/mc'], 'J/(mol K)': ['j/molk', 'j/mol/k'],
+    'J/K': ['j/k'], 'J/mol': ['j/mol'], 'g/s': ['g/s'], 'g/mol': ['g/mol'], 'kg/mol': ['kg/mol'], 'mol': ['mol', 'mole', 'moles'], 'g': ['g', 'gram', 'grams'],
   };
   const unitOk = (typed, unit) => (UNITS[unit] || [normU(unit)]).includes(normU(typed));
-  const relErr = (u, a) => Math.abs(Math.abs(u) - a) / Math.abs(a);
+  // positive keys accept the size either way; a negative key (work on the gas, entropy lost) needs the minus sign
+  const relErr = (u, a) => a < 0 ? Math.abs(u - a) / Math.abs(a) : Math.abs(Math.abs(u) - a) / Math.abs(a);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const FLAG = '<svg viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12M1 1.5h8.5L7.8 4.5l1.7 3H1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
   const ICO_OK = '<svg class="ico" viewBox="0 0 24 24" aria-label="Верно"><circle cx="12" cy="12" r="10" fill="none" stroke="#357a32" stroke-width="2"/><path d="M7.5 12.3l3 3 6-6.6" fill="none" stroke="#357a32" stroke-width="2.2"/></svg>';
   const ICO_PART = '<svg class="ico" viewBox="0 0 24 24" aria-label="Частично правильный"><circle cx="12" cy="12" r="10" fill="none" stroke="#f0ad4e" stroke-width="2"/><path d="M7.5 12.3l3 3 6-6.6" fill="none" stroke="#f0ad4e" stroke-width="2.2"/></svg>';
   const UNIT_PENALTY = 0.1;
-  const figHtml = pr => FIGS[pr.id] ? `<p><img class="qfig" src="img/${FIGS[pr.id]}.jpeg" alt="${esc(pr.fig || 'Figure')}"></p>` : pr.fig ? `<div class="fig">Figure: ${pr.fig}</div>` : '';
+  const figHtml = pr => FIGS[pr.id] ? `<p><img class="qfig" src="${CUR.figDir}${FIGS[pr.id]}.${CUR.figExt}" alt="${esc(pr.fig || 'Figure')}"></p>` : pr.fig ? `<div class="fig">Figure: ${pr.fig}</div>` : '';
   const ICO_NO = '<svg class="ico" viewBox="0 0 24 24" aria-label="Неверно"><circle cx="12" cy="12" r="10" fill="none" stroke="#ca3120" stroke-width="2"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" fill="none" stroke="#ca3120" stroke-width="2.2"/></svg>';
 
   // ── pools ──
@@ -84,22 +104,24 @@
   }
   const pick = (pl, n) => S.mode === 'mistakes' ? shuffle(pl.slice(0, n * 2)).slice(0, n) : shuffle(pl).slice(0, n);
 
-  // ── review-all cycle: every live problem exactly once, dealt into papers of 7 with mixed topics ──
+  // ── review cycle: every covered problem (P1 … P cycleTo) exactly once, dealt into papers of 7 with mixed topics ──
+  const CYC = () => LIVE.filter(p => p.no <= S.cycleTo);
+  const allCovered = () => S.cycleTo >= MAXNO;
   function newCycle() {
-    const nSets = Math.ceil(LIVE.length / SET_SIZE);
-    const deck = shuffle(TOPICS.map(t => t.k)).flatMap(k => shuffle(LIVE.filter(p => p.t === k).map(p => p.id)));
+    const pl = CYC(), nSets = Math.ceil(pl.length / SET_SIZE);
+    const deck = shuffle(TOPICS.map(t => t.k)).flatMap(k => shuffle(pl.filter(p => p.t === k).map(p => p.id)));
     const sets = Array.from({ length: nSets }, () => []);
     deck.forEach((id, i) => sets[i % nSets].push(id));
-    cycle = { started: Date.now(), sets: sets.map(shuffle), res: {} };
+    cycle = { started: Date.now(), to: S.cycleTo, sets: sets.map(shuffle), res: {} };
     saveCycle();
   }
-  const cycleValid = () => cycle && Array.isArray(cycle.sets) && cycle.sets.flat().length === LIVE.length && cycle.sets.flat().every(id => byId[id]);
+  const cycleValid = () => cycle && Array.isArray(cycle.sets) && cycle.sets.flat().length === CYC().length && cycle.sets.flat().every(id => byId[id] && byId[id].no <= S.cycleTo);
   if (!cycleValid()) newCycle();
   const nextSet = () => { const i = cycle.sets.findIndex((_, k) => !cycle.res[k]); return i < 0 ? 0 : i; };
   function cycleProbs(k) {
     const ids = cycle.sets[k].slice();
     // a short paper is topped up with already-seen problems so every paper has 7
-    if (ids.length < SET_SIZE) shuffle(LIVE.map(p => p.id).filter(id => !ids.includes(id))).slice(0, SET_SIZE - ids.length).forEach(id => ids.push(id));
+    if (ids.length < SET_SIZE) shuffle(CYC().map(p => p.id).filter(id => !ids.includes(id))).slice(0, SET_SIZE - ids.length).forEach(id => ids.push(id));
     return ids.map(id => byId[id]);
   }
 
@@ -107,8 +129,8 @@
     const vals = Object.values(stats);
     const a = vals.reduce((s, x) => s + x.a, 0), c = vals.reduce((s, x) => s + x.c, 0);
     return `<header class="mbar">
-      <div class="brand">PHYS161<small>Exam 3 practice</small></div>
-      <nav><a href="./" ${active === 'trainer' ? 'aria-current="page"' : ''}>Тест</a><a href="units.html">Units</a></nav>
+      <div class="brand">PHYS161<small>${EXAM} practice</small></div>
+      <nav>${[3, 4].map(n => `<a href="./?set=${n}" ${n === setNo ? 'aria-current="page"' : ''}>Exam ${n}</a>`).join('')}<a href="units.html">Units</a></nav>
       <div class="who">${a ? `Record: ${c} / ${a} correct` : 'Practice quiz'}</div>
     </header><div class="mpage">${inner}</div>`;
   }
@@ -123,43 +145,44 @@
     const seg = (attr, items) => `<span class="seg">${items.map(([v, l]) => `<button data-${attr}="${v}" aria-pressed="${S[attr] === v}">${l}</button>`).join('')}</span>`;
     const done = Object.keys(cycle.res).length, total = cycle.sets.length, nx = nextSet();
     const seen = Object.keys(cycle.res).reduce((s, k) => s + cycle.sets[k].length, 0);
+    const nCyc = CYC().length, cycName = allCovered() ? 'Review all' : 'Review covered';
 
     $app.innerHTML = shell(`
-      <div class="crumbs">PHYS161 / Exam 3 / Practice</div>
-      <h1>Exam 3 practice quiz</h1>
+      <div class="crumbs">PHYS161 / ${EXAM} / Practice</div>
+      <h1>${EXAM} practice quiz</h1>
       <div class="cols"><div>
         <div class="card">
           <h2>Paper</h2>
           <div class="opts">
-            ${opt('cycle', 'Review all', `all ${LIVE.length} problems, ${total} papers of ${SET_SIZE}, nothing repeats`, `<span class="r">${seen} / ${LIVE.length} done</span>`)}
+            ${opt('cycle', cycName, `${total} papers of ${SET_SIZE}, no repeats`, `<span class="r" onclick="event.stopPropagation()">P1 – P<input class="num-in" id="cycleTo" type="number" min="7" max="${MAXNO}" value="${Math.min(S.cycleTo, MAXNO)}" aria-label="Review up to"> · ${seen}/${nCyc}</span>`)}
             ${opt('mock', 'Random mock', 'random from everything covered', `<span class="r" onclick="event.stopPropagation()">P1 – P<input class="num-in" id="covered" type="number" min="1" max="${MAXNO}" value="${S.covered}" aria-label="Covered up to"></span>`)}
             ${opt('topic', 'By topic', 'only the topics ticked below', `<span class="r">${S.topics.length} ticked</span>`)}
             ${opt('range', 'By range', 'a block of problems', `<span class="r" onclick="event.stopPropagation()">P<input class="num-in" id="from" type="number" min="1" max="${MAXNO}" value="${S.from}" aria-label="From"> – P<input class="num-in" id="to" type="number" min="1" max="${MAXNO}" value="${S.to}" aria-label="To"></span>`)}
             ${opt('mistakes', 'My mistakes', 'problems you got wrong before', `<span class="r">${mk} waiting</span>`)}
           </div>
-          <p class="small" style="margin:12px 0 0">Numbering follows the professor's official list. Removed problems (P87, P105, P106, P122, P125) never appear.</p>
+          <p class="small" style="margin:12px 0 0">${REMOVED.size ? "Numbering follows the professor's official list. Removed problems (P87, P105, P106, P122, P125) never appear." : `Numbering follows the ${EXAM} Google Doc, P1–P${MAXNO}. Covered so far: P1–P${Math.min(S.cycleTo, MAXNO)} (${TOPICS.filter(t => LIVE.filter(p => p.t === t.k).every(p => p.no <= S.cycleTo)).map(t => t.name).join(', ') || 'none yet'}).`}</p>
         </div>
 
         ${cyc ? `<div class="card">
-          <h2>Review all · paper ${Math.min(nx + 1, total)} of ${total}</h2>
+          <h2>${cycName} · paper ${Math.min(nx + 1, total)} of ${total}</h2>
           <div class="cyc-top"><div class="prog"><i style="width:${100 * done / total}%"></i></div><span class="small">${done} of ${total} papers done</span></div>
           <div class="sets">${cycle.sets.map((ids, k) => { const r = cycle.res[k];
             const cls = r ? (r.right / r.n >= 0.6 ? 'done' : 'low') : k === nx ? 'next' : '';
             return `<button class="set ${cls}" data-set="${k}" title="Paper ${k + 1}: ${ids.map(id => 'P' + byId[id].no).join(', ')}"><span class="s1">${k + 1}</span><span class="s2">${r ? `${+r.right.toFixed(1)}/${r.n}` : k === nx ? 'next' : `${ids.length} q`}</span></button>`; }).join('')}</div>
           <p class="small" style="margin:12px 0 0">Each paper mixes topics, like the real exam. Click any paper to sit it again. ${cycle.sets.some(s => s.length < SET_SIZE) ? `Papers with ${Math.min(...cycle.sets.map(s => s.length))} new problems get one already-seen problem added, so every paper has ${SET_SIZE}.` : ''}</p>
           <p style="margin:10px 0 0"><button class="mlink" id="reshuffle">Start a new shuffle</button></p>
-          <div class="confirm" id="reshBox" hidden><p style="margin:0 0 12px">Deal all ${LIVE.length} problems into new papers? Your paper scores for this round are cleared (your overall record stays).</p>
+          <div class="confirm" id="reshBox" hidden><p style="margin:0 0 12px">Deal all ${nCyc} problems into new papers? Your paper scores for this round are cleared (your overall record stays).</p>
             <div class="row"><button class="mbtn" id="reshYes">New shuffle</button><button class="mbtn sec" id="reshNo">Cancel</button></div></div>
         </div>` : ''}
 
-        ${S.mode === 'topic' ? `<div class="card"><h2>Topics</h2><div class="opts">${TOPICS.map(t => `<button class="opt chk" data-topic="${t.k}" aria-pressed="${S.topics.includes(t.k)}"><span class="dot"></span><span>${t.name}</span><span class="r">${range(t.k)}</span></button>`).join('')}</div></div>` : ''}
+        ${S.mode === 'topic' ? `<div class="card"><h2>Topics</h2><div class="opts">${TOPICS.map(t => `<button class="opt chk" data-topic="${t.k}" aria-pressed="${S.topics.includes(t.k)}"><span class="dot"></span><span>${t.name}${LIVE.filter(p => p.t === t.k).every(p => p.no <= S.cycleTo) ? ' <span class="muted">· covered</span>' : ''}</span><span class="r">${range(t.k)}</span></button>`).join('')}</div></div>` : ''}
 
         <div class="card">
           <h2>Settings</h2>
           <div class="form">
             ${cyc ? '' : `<div class="k">Questions</div><div><input class="num-in" id="count" type="number" min="1" max="30" value="${S.count}" aria-label="Number of questions"></div>`}
             <div class="k">Mode</div><div>${seg('style', [['exam', 'Exam'], ['practice', 'Practice']])} <span class="small">${S.style === 'exam' ? 'no help, marked at the end' : 'check each answer, see the formula'}</span></div>
-            <div class="k">Numbers</div><div>${seg('numbers', [['new', 'New'], ['original', 'Original']])}</div>
+            <div class="k">Numbers</div><div>${CUR.fixedNumbers ? '<span class="small">Original numbers from the doc</span>' : seg('numbers', [['new', 'New'], ['original', 'Original']])}</div>
             <div class="k">Time limit</div><div><select class="msel" id="timer">${[0, 10, 15, 20, 30, 45].map(m => `<option value="${m}" ${+S.timer === m ? 'selected' : ''}>${m ? m + ' min' : 'No limit'}</option>`).join('')}</select></div>
             <div class="k">Accept within</div><div><select class="msel" id="tol">${[0.5, 1, 2, 3].map(t => `<option value="${t}" ${+S.tol === t ? 'selected' : ''}>±${t}%</option>`).join('')}</select></div>
             <div class="k">Answer format</div><div class="small">Number and unit in one box, like the real quiz: <code>25006.249 m/s</code>, <code>3.9e-10 N</code>, <code>2.5*10^-11 N</code></div>
@@ -174,7 +197,7 @@
         ${record()}
       </div>
       <aside class="navblock"><div class="card"><h3>This quiz</h3>
-        <table class="mtable"><tr><th style="width:auto">Problems</th><td>${LIVE.length}</td></tr><tr><th style="width:auto">Removed</th><td>5</td></tr><tr><th style="width:auto">Real exam</th><td>7 questions</td></tr></table>
+        <table class="mtable"><tr><th style="width:auto">Problems</th><td>${LIVE.length}</td></tr>${REMOVED.size ? `<tr><th style="width:auto">Removed</th><td>${REMOVED.size}</td></tr>` : ''}<tr><th style="width:auto">Covered</th><td>P1–P${Math.min(S.cycleTo, MAXNO)}</td></tr><tr><th style="width:auto">Real exam</th><td>7 questions</td></tr></table>
       </div></aside></div>`);
 
     $app.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { S.mode = b.dataset.mode; saveS(); setup(); });
@@ -185,6 +208,9 @@
     const num = (id, key, lo, hi, mode) => { const el = document.getElementById(id); if (!el) return;
       el.onclick = e => e.stopPropagation();
       el.onchange = () => { S[key] = Math.min(hi, Math.max(lo, parseInt(el.value, 10) || lo)); if (mode) S.mode = mode; saveS(); setup(); }; };
+    const cyIn = document.getElementById('cycleTo');
+    if (cyIn) { cyIn.onclick = e => e.stopPropagation();
+      cyIn.onchange = () => { const v = Math.min(MAXNO, Math.max(7, parseInt(cyIn.value, 10) || 7)); if (v !== S.cycleTo) { S.cycleTo = v; S.covered = v; S.mode = 'cycle'; saveS(); newCycle(); } setup(); }; }
     num('covered', 'covered', 1, MAXNO, 'mock'); num('from', 'from', 1, MAXNO, 'range'); num('to', 'to', 1, MAXNO, 'range'); num('count', 'count', 1, 30);
     document.getElementById('timer').onchange = e => { S.timer = +e.target.value; saveS(); };
     document.getElementById('tol').onchange = e => { S.tol = +e.target.value; saveS(); };
@@ -241,7 +267,7 @@
       if (left <= 0 && !exam.done) finish(true);
     } else el.innerHTML = `Прошло времени <b>${hms(used)}</b>`;
   }
-  const title = () => exam.setIdx !== null ? `Review all · paper ${exam.setIdx + 1} of ${cycle.sets.length}` : 'Practice attempt';
+  const title = () => exam.setIdx !== null ? `${allCovered() ? "Review all" : "Review covered"} · paper ${exam.setIdx + 1} of ${cycle.sets.length}` : 'Practice attempt';
 
   function navBlock(review) {
     return `<aside class="navblock"><div class="card">
@@ -254,7 +280,7 @@
   function drawAttempt() {
     const practice = exam.style === 'practice';
     $app.innerHTML = shell(`
-      <div class="crumbs">PHYS161 / Exam 3 / ${title()}</div>
+      <div class="crumbs">PHYS161 / ${EXAM} / ${title()}</div>
       <div class="cols"><div>
         ${exam.qs.map((x, i) => qBlock(x, i, practice)).join('')}
         <div class="row" style="justify-content:flex-end"><button class="mbtn" id="toSummary2">Закончить попытку...</button></div>
@@ -311,10 +337,11 @@
     if (x.checked === true) fb.innerHTML = `<div class="inline-fb ok">Верно: ${fmtAns(x.ans)} ${x.prob.unit}</div>`;
     else if (x.checked === 'part') fb.innerHTML = `<div class="inline-fb part">Частично правильный: 0,90 из 1,00 (unit: ${x.prob.unit || 'none'})</div>`;
     else {
-      const dir = Math.abs(u) > x.ans ? 'too high' : 'too low';
-      const off = e < 1 ? `${(e * 100).toFixed(e < 0.1 ? 1 : 0)}%` : `${Math.round(Math.abs(u) / x.ans)}×`;
+      const a = Math.abs(x.ans), signOnly = x.ans < 0 && relErr(-u, x.ans) <= exam.tol;
+      const dir = Math.abs(u) > a ? 'too high' : 'too low';
+      const off = Math.abs(Math.abs(u) - a) / a < 1 ? `${(100 * Math.abs(Math.abs(u) - a) / a).toFixed(e < 0.1 ? 1 : 0)}%` : `${Math.round(Math.abs(u) / a)}×`;
       const pow = [1e3, 1e-3, 1e2, 1e-2, 1e4, 1e-4, 1e6, 1e-6].some(f => relErr(u * f, x.ans) <= exam.tol) ? ' Right digits, wrong power of 10: km/m, cm/m, g/kg?' : '';
-      const msg = `${dir} by ${off}.${pow}`;
+      const msg = signOnly ? 'Right size, but this answer is negative: put the minus sign.' : `${dir} by ${off}.${pow}`;
       fb.innerHTML = `<div class="inline-fb no">Неверно. ${msg} <button class="mlink" id="rv${i}" style="margin-left:6px">Show answer</button></div>`;
       document.getElementById('rv' + i).onclick = () => { x.reveal = true; fb.innerHTML = `<div class="outcome"><p class="rightans">Один из возможных правильных ответов: ${fmtAns(x.ans, 9)} ${x.prob.unit}</p></div>`; };
     }
@@ -332,7 +359,7 @@
   // ── attempt summary (before submitting) ──
   function summary() {
     $app.innerHTML = shell(`
-      <div class="crumbs">PHYS161 / Exam 3 / ${title()}</div>
+      <div class="crumbs">PHYS161 / ${EXAM} / ${title()}</div>
       <h1>Сводка попытки</h1>
       <div class="cols"><div><div class="card">
         <table class="mtable list"><tr><th>Вопрос</th><th>Состояние</th><th>Отмечен</th></tr>
@@ -384,7 +411,7 @@
     const n = exam.qs.length, pct = Math.round(100 * right / n);
     const last = exam.setIdx !== null && Object.keys(cycle.res).length === cycle.sets.length;
     $app.innerHTML = shell(`
-      <div class="crumbs">PHYS161 / Exam 3 / ${title()} / Просмотр</div>
+      <div class="crumbs">PHYS161 / ${EXAM} / ${title()} / Просмотр</div>
       <div class="cols"><div>
         <div class="card" style="padding:0;overflow:hidden"><table class="mtable">
           <tr><th>Тест начат</th><td>${when(exam.t0)}</td></tr>
@@ -397,7 +424,7 @@
         ${last ? `<div class="card"><b>All ${cycle.sets.length} papers done.</b> You have seen every problem once. Redo the red papers, or start a new shuffle from the start page.</div>` : ''}
         <div class="row" style="margin-bottom:22px">
           ${exam.setIdx !== null && !last ? `<button class="mbtn" id="nextPaper">Next paper (${nextSet() + 1})</button>` : ''}
-          <button class="mbtn ${exam.setIdx !== null && !last ? 'sec' : ''}" id="again">Same problems, new numbers</button>
+          <button class="mbtn ${exam.setIdx !== null && !last ? 'sec' : ''}" id="again">${CUR.fixedNumbers ? "Same problems again" : "Same problems, new numbers"}</button>
           ${exam.qs.some(x => !x.ok) ? '<button class="mbtn sec" id="wrongOnly">Redo the wrong ones</button>' : ''}
           ${exam.setIdx === null ? '<button class="mbtn sec" id="newset">New paper</button>' : ''}
         </div>
