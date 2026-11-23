@@ -29,6 +29,7 @@
   const KEY = `set${setNo}.`;
   let S = Object.assign({}, DEF, store.get(KEY + 'settings', {}));
   if (CUR.fixedNumbers) S.numbers = 'original';
+  if ((S.covered || 0) < CUR.covered) { S.covered = CUR.covered; S.cycleTo = Math.max(S.cycleTo || 0, CUR.covered); }
   let stats = store.get(KEY + 'stats', {});
   let cycle = store.get(KEY + 'cycle', null);
   const saveS = () => store.set(KEY + 'settings', S);

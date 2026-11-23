@@ -161,5 +161,5 @@
   ];
   const FIGS = {"6": "fig6", "29": "fig29", "31": "fig31", "36": "fig36", "90": "fig90", "91": "fig90", "92": "fig90", "93": "fig93", "97": "fig97", "98": "fig97", "99": "fig97", "100": "fig97", "112": "fig112", "150": "fig150"};
   window.SET4 = { n: 4, name: 'Exam 4', BANK, TOPICS, FIGS, figExt: 'png', figDir: 'img/set4/',
-    OFFICIAL: Object.fromEntries(BANK.map(p => [p.id, p.id])), REMOVED: new Set(), covered: 76, fixedNumbers: true };
+    OFFICIAL: Object.fromEntries(BANK.map(p => [p.id, p.id])), REMOVED: new Set(), covered: 114, fixedNumbers: true };
 })();
