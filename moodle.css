@@ -178,3 +178,26 @@ sup { line-height: 0; }
   .mbar .brand small, .mbar .who { display: none; }
   .mpage { padding: 16px 16px 48px; }
 }
+
+/* pause */
+.pausebtn { width: 100%; margin: -4px 0 12px; background: #fff; color: var(--ink); border: 1px solid #8f959e; }
+.pause-ov { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: var(--page); }
+.pause-ov[hidden] { display: none; }
+.pause-ov p { margin: 0 0 14px; font-size: 18px; text-align: center; }
+.pause-ov div { text-align: center; }
+/* step-by-step solutions */
+.st { margin: 12px 0 0 !important; }
+.st:first-child { margin-top: 0 !important; }
+.trap { margin: 12px 0 0 !important; padding-top: 8px; border-top: 1px solid var(--fb-line); }
+
+@media (max-width: 480px) {
+  .mbar { gap: 10px; padding: 0 12px; }
+  .mbar .brand { font-size: 18px; }
+  .mbar .brand small { display: none; }
+  .mbar nav { gap: 0; min-width: 0; }
+  .mbar nav a { padding: 19px 6px; font-size: 14px; white-space: nowrap; }
+}
+.mtable td { overflow-wrap: anywhere; }
+@media (max-width: 480px) { .mtable:not(.list) th { width: 40%; } }
+.cols > * { min-width: 0; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }

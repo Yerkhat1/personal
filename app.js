@@ -131,7 +131,7 @@
     const a = vals.reduce((s, x) => s + x.a, 0), c = vals.reduce((s, x) => s + x.c, 0);
     return `<header class="mbar">
       <div class="brand">PHYS161<small>${EXAM} practice</small></div>
-      <nav>${[3, 4].map(n => `<a href="./?set=${n}" ${n === setNo ? 'aria-current="page"' : ''}>Exam ${n}</a>`).join('')}<a href="units.html">Units</a></nav>
+      <nav>${[3, 4].map(n => `<a href="./?set=${n}" ${n === setNo ? 'aria-current="page"' : ''}>Exam ${n}</a>`).join('')}<a href="notes.html">Notes</a><a href="units.html">Units</a></nav>
       <div class="who">${a ? `Record: ${c} / ${a} correct` : 'Practice quiz'}</div>
     </header><div class="mpage">${inner}</div>`;
   }
@@ -251,17 +251,29 @@
   // ── attempt ──
   function start(probs, setIdx = null) {
     const qs = probs.map(prob => { const { p, ans } = genParams(prob, S.numbers === 'original'); return { prob, p, ans, html: render(prob, p), user: '', flag: false, checked: null, hint: false, reveal: false, firstWrong: false }; });
-    exam = { qs, setIdx, style: S.style, tol: S.tol / 100, limit: +S.timer * 60, t0: Date.now(), done: false };
+    exam = { qs, setIdx, style: S.style, tol: S.tol / 100, limit: +S.timer * 60, t0: Date.now(), done: false, pausedAt: null, pausedMs: 0 };
     drawAttempt(); window.scrollTo({ top: 0 }); startTick();
   }
   function startTick() { stopTick(); tick = setInterval(updClock, 1000); updClock(); }
   function stopTick() { if (tick) clearInterval(tick); tick = null; }
   const hms = s => { s = Math.floor(s); return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
   const minsec = s => { s = Math.round(s); const m = Math.floor(s / 60); return m ? `${m} мин. ${s % 60} сек.` : `${s} сек.`; };
+  // time on the clock, not counting pauses
+  const usedSec = (now = Date.now()) => (now - exam.t0 - exam.pausedMs - (exam.pausedAt ? now - exam.pausedAt : 0)) / 1000;
+  function togglePause() {
+    if (!exam || exam.done) return;
+    if (exam.pausedAt) { exam.pausedMs += Date.now() - exam.pausedAt; exam.pausedAt = null; }
+    else exam.pausedAt = Date.now();
+    const ov = document.getElementById('pauseOv'), b = document.getElementById('pauseBtn');
+    if (ov) ov.hidden = !exam.pausedAt;
+    if (b) b.textContent = exam.pausedAt ? 'Resume' : 'Pause';
+    updClock();
+  }
   function updClock() {
     if (!exam) return;
     const el = document.getElementById('clock'); if (!el) return;
-    const used = (Date.now() - exam.t0) / 1000;
+    const used = usedSec();
+    if (exam.pausedAt) { el.innerHTML = `Paused <b>${hms(exam.limit ? Math.max(0, exam.limit - used) : used)}</b>`; el.classList.remove('low'); return; }
     if (exam.limit) {
       const left = Math.max(0, exam.limit - used);
       el.innerHTML = `Оставшееся время <b>${hms(left)}</b>`; el.classList.toggle('low', left < 60);
@@ -273,7 +285,7 @@
   function navBlock(review) {
     return `<aside class="navblock"><div class="card">
       <h3>Навигация по тесту</h3>
-      ${review ? '' : '<div class="timer" id="clock"></div>'}
+      ${review ? '' : '<div class="timer" id="clock"></div><button class="mbtn pausebtn" id="pauseBtn">Pause</button>'}
       <nav class="qnav" aria-label="Вопросы">${exam.qs.map((x, i) => `<a href="#q${i}" id="nav${i}" aria-label="Вопрос ${i + 1}">${i + 1}</a>`).join('')}</nav>
       ${review ? '<button class="mlink" id="endReview">Закончить обзор</button>' : '<button class="mlink" id="toSummary">Завершить попытку...</button>'}
     </div></aside>`;
@@ -285,10 +297,14 @@
       <div class="cols"><div>
         ${exam.qs.map((x, i) => qBlock(x, i, practice)).join('')}
         <div class="row" style="justify-content:flex-end"><button class="mbtn" id="toSummary2">Закончить попытку...</button></div>
-      </div>${navBlock(false)}</div>`);
+      </div>${navBlock(false)}</div>
+      <div class="pause-ov" id="pauseOv" hidden><div><p>Paused. The clock is stopped.</p><button class="mbtn" id="resumeBtn">Resume</button></div></div>`);
     exam.qs.forEach((x, i) => wireQ(i));
     document.getElementById('toSummary').onclick = summary;
     document.getElementById('toSummary2').onclick = summary;
+    document.getElementById('pauseBtn').onclick = togglePause;
+    document.getElementById('resumeBtn').onclick = togglePause;
+    if (exam.pausedAt) { document.getElementById('pauseOv').hidden = false; document.getElementById('pauseBtn').textContent = 'Resume'; }
     wireNav();
     updNav();
   }
@@ -393,7 +409,7 @@
   function finish(timeUp) {
     if (exam.done) return;
     exam.done = true; stopTick();
-    const t1 = Date.now(), used = Math.min((t1 - exam.t0) / 1000, exam.limit || Infinity);
+    const t1 = Date.now(), used = Math.min(usedSec(t1), exam.limit || Infinity);
     let right = 0;
     exam.qs.forEach(x => {
       const { v: u, unit } = parseAns(x.user);

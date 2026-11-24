@@ -1,0 +1,110 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exam 4 Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Kalam:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  .f { overflow-x: auto; margin: 6px 0 10px; }
+  .sec h3 { margin: 18px 0 6px; font-size: 16px; }
+</style></head><body><div class="desk"><main id="app">
+<div class="paper">
+<header class="ph">
+  <div class="course">PHYS161 · Physics I <nav class="tabs"><a href="./?set=4">Trainer</a><a href="notes.html" aria-current="page">Notes</a><a href="units.html">Units</a></nav></div>
+  <div class="rightc">Exam 4</div>
+  <h1>Exam 4 notes</h1>
+  <div class="instr">The words, the hooks, the formulas. Read before a paper.</div>
+</header><hr class="dbl">
+
+<section class="sec">
+  <h2><b>1</b> Words → what is zero</h2>
+  <p class="rule"><b>Iso = same.</b> Whatever comes after "iso" does not change.</p>
+  <div class="tw"><table class="ut">
+    <tr><th>Word</th><th>Hook</th><th>So</th></tr>
+    <tr><td>Iso<b>therm</b>al</td><td>therm = temperature, T same</td><td class="num">ΔU = 0, Q = W</td></tr>
+    <tr><td>Iso<b>bar</b>ic</td><td>bar = pressure unit, p same</td><td class="num">W = pΔV</td></tr>
+    <tr><td>Iso<b>chor</b>ic, rigid</td><td>khōra = room, V same</td><td class="num">W = 0, Q = ΔU</td></tr>
+    <tr><td>Adiabatic, rapidly, insulated</td><td>"no passing through"</td><td class="num">Q = 0, W = −ΔU</td></tr>
+    <tr><td>Cycle</td><td>back home, same T</td><td class="num">ΔU = 0, Q = W</td></tr>
+  </table></div>
+  <p class="rule"><b>U lives on T.</b> T doesn't change → U doesn't change.</p>
+</section>
+
+<section class="sec">
+  <h2><b>2</b> Gas type</h2>
+  <div class="tw"><table class="ut">
+    <tr><th>Gas</th><th>U</th><th>C_V</th><th>C_p</th><th>γ</th></tr>
+    <tr><td>Monatomic, one atom (He, Ne, Ar, Xe)</td><td class="num">3/2 nRT</td><td class="num">3/2 R</td><td class="num">5/2 R</td><td class="num">5/3</td></tr>
+    <tr><td>Diatomic, two atoms (N₂, O₂, air)</td><td class="num">5/2 nRT</td><td class="num">5/2 R</td><td class="num">7/2 R</td><td class="num">1.4</td></tr>
+    <tr><td>Real gas</td><td colspan="4">no 3/2. Use ΔU = Q − pΔV</td></tr>
+  </table></div>
+  <p class="rule"><b>k_B = one molecule, R = moles.</b> K̄ = 3/2 k_BT for one molecule, U = 3/2 nRT for the whole gas.</p>
+</section>
+
+<section class="sec">
+  <h2><b>3</b> Signs</h2>
+  <p class="rule"><b>Work.</b> Expands / by the gas → W +. Compressed / on the gas → W −.</p>
+  <p class="rule"><b>Heat.</b> In → Q +. Out → Q −.</p>
+  <p class="rule"><b>Entropy = a wallet of heat.</b> Gets heat → ΔS +. Gives heat → ΔS −. Same heat, opposite signs for giver and receiver.</p>
+  <p class="rule"><b>Hot or cold?</b> Look at the reservoir the sentence names: "from the hot reservoir" → Q_H, "to/from the cold reservoir" → Q_C. Q_H is always the biggest.</p>
+</section>
+
+<section class="sec">
+  <h2><b>4</b> Units</h2>
+  <p class="rule"><b>Kelvin rule.</b> Subtracting two temperatures (T₂ − T₁) → °C is fine. Anything else (T alone, dividing, ln, ratios) → K. Unsure → convert, never wrong.</p>
+  <div class="tw"><table class="ut">
+    <tr><th>Given</th><th>Do</th></tr>
+    <tr><td>L</td><td class="num">÷ 1000 → m³</td></tr>
+    <tr><td>mL, cm³</td><td class="num">× 10⁻⁶ → m³</td></tr>
+    <tr><td>atm</td><td class="num">× 101325 → Pa</td></tr>
+    <tr><td>k, M</td><td class="num">× 10³, × 10⁶</td></tr>
+    <tr><td>kcal</td><td class="num">× 4186 → J</td></tr>
+    <tr><td>g/mol with R</td><td class="num">÷ 1000 → kg/mol</td></tr>
+    <tr><td>W (watts)</td><td class="num">per second, ÷ cycles/s for per cycle</td></tr>
+  </table></div>
+  <p class="rule"><b>Ratios</b> (V₁/V₂, p₁/p₂): any unit, as long as both match. Answer in kg unless it asks for g.</p>
+</section>
+
+<section class="sec">
+  <h2><b>5</b> Heat · P1–39</h2>
+  <div class="f">$$Q=mc\Delta T,\qquad Q=mL,\qquad Q_{\text{lost}}=Q_{\text{gained}}$$</div>
+  <div class="f">$$\Delta L=\alpha L_0\Delta T,\qquad \Delta A=2\alpha A_0\Delta T,\qquad \Delta V=3\alpha V_0\Delta T$$</div>
+  <div class="f">$$x=\sqrt{\left(\frac{L'}{2}\right)^2-\left(\frac{L}{2}\right)^2},\qquad L'=L(1+\alpha\Delta T)$$</div>
+  <div class="f">$$H=\frac{Q}{t}=\frac{kA\Delta T}{d},\qquad E=Pt,\qquad mgh=mc\Delta T,\qquad \frac{1}{2}mv^2=mL,\qquad m=\rho V$$</div>
+</section>
+
+<section class="sec">
+  <h2><b>6</b> Gases · P40–76</h2>
+  <div class="f">$$pV=nRT,\qquad n=\frac{m}{M},\qquad \frac{p_1V_1}{T_1}=\frac{p_2V_2}{T_2}$$</div>
+  <p class="rule"><b>Cross out what is constant.</b> Constant p → V/T. Constant V → p/T. Constant T → pV.</p>
+  <div class="f">$$v_{rms}=\sqrt{\frac{3RT}{M}},\qquad \bar K=\frac{3}{2}k_BT,\qquad K=\frac{3}{2}nRT$$</div>
+  <div class="f">$$N=nN_A,\qquad pV=Nk_BT,\qquad m_{\text{molecule}}=\frac{M}{N_A}$$</div>
+  <div class="f">$$p=p_0+\rho gh,\qquad M_{\text{mix}}=\sum x_iM_i,\qquad \rho=\frac{pM}{RT}$$</div>
+</section>
+
+<section class="sec">
+  <h2><b>7</b> 1st law · P77–114</h2>
+  <div class="f">$$\Delta U=Q-W,\qquad \Delta U=\frac{3}{2}nR\Delta T=\frac{3}{2}(p_2V_2-p_1V_1)$$</div>
+  <div class="f">$$W=p\Delta V\ \text{(const p)},\qquad W=\text{area under the path}$$</div>
+  <div class="f">$$W=nRT\ln\frac{V_2}{V_1}\ \text{(const T)}$$</div>
+  <div class="f">$$Q=nC\Delta T,\qquad C_p-C_V=R,\qquad p\Delta V=nR\Delta T$$</div>
+  <div class="f">$$TV^{\gamma-1}=\text{const},\qquad pV^{\gamma}=\text{const}\ \text{(adiabatic)}$$</div>
+  <p class="rule"><b>Halved volume.</b> T × 2^0.4, p × 2^1.4. p gets the full γ, T gets one less.</p>
+</section>
+
+<section class="sec">
+  <h2><b>8</b> 2nd law · P115–150</h2>
+  <div class="f">$$e=\frac{W}{Q_H},\qquad Q_H=W+Q_C,\qquad e_{\text{Carnot}}=1-\frac{T_C}{T_H}$$</div>
+  <div class="f">$$K=\frac{Q_C}{W}=\frac{T_C}{T_H-T_C}\ \text{(fridge)},\qquad e=\frac{P_{out}}{P_{in}}$$</div>
+  <div class="f">$$\Delta S=\frac{Q}{T}\ \text{(T fixed)},\qquad \Delta S=mc\ln\frac{T_2}{T_1}\ \text{(T changes)}$$</div>
+  <p class="rule"><b>T fixed</b> = lake, melting (273 K), boiling or condensing (373 K), isothermal. <b>T changes</b> = something heating or cooling.</p>
+  <p class="rule"><b>Universe / total</b> = add every part's ΔS. Always positive.</p>
+</section>
+</div></main></div>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>renderMathInElement(document.body, { delimiters: [{ left: '$$', right: '$$', display: true }], throwOnError: false });</script>
+<script src="zoom.js"></script></body></html>
